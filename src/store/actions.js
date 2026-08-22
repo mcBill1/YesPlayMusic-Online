@@ -191,11 +191,24 @@ export default {
     });
   },
   fetchUserProfile: ({ commit }) => {
-    if (!isAccountLoggedIn()) return;
+    if (!isAccountLoggedIn()) return Promise.resolve(null);
     return userAccount().then(result => {
-      if (result.code === 200) {
+      // 共享账号版：cookie 无效/匿名时 API 返回 code:200 + profile:null，视为未绑定
+      if (result.code === 200 && result.profile) {
         commit('updateData', { key: 'user', value: result.profile });
+        return result.profile;
+      } else if (result.code === 200 && !result.profile) {
+        // 匿名 token 或无效 cookie：清本地登录态（避免伪登录）
+        commit('updateData', { key: 'user', value: {} });
+        commit('updateData', { key: 'loginMode', value: null });
+        return null;
+      } else if (result.code === 301 || result.code === 401) {
+        // 网易云登录态失效：清本地登录态（服务器绑定由用户重新扫码）
+        commit('updateData', { key: 'user', value: {} });
+        commit('updateData', { key: 'loginMode', value: null });
+        return null;
       }
+      return null;
     });
   },
 };

@@ -57,13 +57,17 @@
         <svg-icon icon-class="settings" />
         {{ $t('library.userProfileMenu.settings') }}
       </div>
-      <div v-if="!isLooseLoggedIn" class="item" @click="toLogin">
-        <svg-icon icon-class="login" />
-        {{ $t('login.login') }}
-      </div>
-      <div v-if="isLooseLoggedIn" class="item" @click="logout">
+      <div class="item" @click="logoutSession">
         <svg-icon icon-class="logout" />
         {{ $t('library.userProfileMenu.logout') }}
+      </div>
+      <div v-if="!ncmBound" class="item" @click="toNeteaseLogin">
+        <svg-icon icon-class="login" />
+        登录网易云账号
+      </div>
+      <div v-else class="item" @click="logoutNetease">
+        <svg-icon icon-class="logout" />
+        退出网易云账号
       </div>
       <hr />
       <div class="item" @click="toGitHub">
@@ -76,7 +80,8 @@
 
 <script>
 import { mapState } from 'vuex';
-import { isLooseLoggedIn, doLogout } from '@/utils/auth';
+import { isLooseLoggedIn, clearLocalCookies } from '@/utils/auth';
+import { unbindNetease, logoutAccess, getStatus } from '@/utils/access';
 
 // import icons for win32 title bar
 // icons by https://github.com/microsoft/vscode-codicons
@@ -102,6 +107,7 @@ export default {
       keywords: '',
       enableWin32Titlebar: false,
       enableLinuxTitlebar: false,
+      ncmBound: false, // 网易云共享账号绑定状态（来自网关 /access/status）
     };
   },
   computed: {
@@ -112,7 +118,7 @@ export default {
     avatarUrl() {
       return this.data?.user?.avatarUrl && this.isLooseLoggedIn
         ? `${this.data?.user?.avatarUrl}?param=512y512`
-        : 'http://s4.music.126.net/style/web2/img/default/default_avatar.jpg?param=60y60';
+        : 'https://s4.music.126.net/style/web2/img/default/default_avatar.jpg?param=60y60';
     },
     hasCustomTitlebar() {
       return this.enableWin32Titlebar || this.enableLinuxTitlebar;
@@ -127,6 +133,13 @@ export default {
     ) {
       this.enableLinuxTitlebar = true;
     }
+    this.refreshStatus();
+  },
+  watch: {
+    // 登录/解绑/路由变化后刷新网易云绑定状态
+    $route() {
+      this.refreshStatus();
+    },
   },
   methods: {
     go(where) {
@@ -149,16 +162,61 @@ export default {
     showUserProfileMenu(e) {
       this.$refs.userProfileMenu.openMenu(e);
     },
-    logout() {
-      if (!confirm('确定要退出登录吗？')) return;
-      doLogout();
-      this.$router.push({ name: 'home' });
+    // 从网关刷新网易云绑定状态（B 状态）
+    refreshStatus() {
+      getStatus()
+        .then(res => {
+          this.ncmBound = !!res.data?.ncmBound;
+        })
+        .catch(() => {});
+    },
+    // 未绑定网易云：跳转网易云登录界面
+    toNeteaseLogin() {
+      this.$router.push({ name: 'loginAccount' });
+    },
+    // 退出网页登录：仅销毁当前浏览器 gateway session，不影响服务器共享的网易云账号
+    async logoutSession() {
+      if (!confirm('确定要退出网页登录吗？')) return;
+      try {
+        await logoutAccess();
+      } catch (e) {
+        // session 可能已失效，忽略错误继续清理
+      }
+      // 清除浏览器本地可能残留的网易云 cookie（凭证只存服务器，本地不留）
+      // 注意：不动服务器绑定；不清 loginMode/user —— 网易云登录态（B）保留
+      clearLocalCookies();
+      window.location.href = '/access/login';
+    },
+    // 退出网易云账号：解绑服务器共享账号，所有浏览器失效，二次确认
+    logoutNetease() {
+      if (!this.ncmBound) {
+        return; // 未绑定网易云，按钮不显示/不可点
+      }
+      if (
+        !confirm(
+          '退出网易云账号将解除服务器绑定的账号，所有浏览器都将失去网易云登录态。确定？'
+        )
+      )
+        return;
+      unbindNetease()
+        .then(() => {
+          // 仅解绑网易云 cookie，不销毁 gateway session（网页登录不受影响）
+          this.ncmBound = false;
+          this.$store.commit('updateData', { key: 'user', value: {} });
+          this.$store.commit('updateData', { key: 'loginMode', value: null });
+          this.$store.commit('updateData', {
+            key: 'likedSongPlaylistID',
+            value: undefined,
+          });
+          this.$router.push({ name: 'loginAccount' });
+        })
+        .catch(err => alert(err?.response?.data?.msg || '解绑失败'));
     },
     toSettings() {
       this.$router.push({ name: 'settings' });
     },
     toGitHub() {
-      window.open('https://github.com/qier222/YesPlayMusic');
+      window.open('https://github.com/mcBill1/YesPlayMusic-Online');
     },
     toLogin() {
       if (process.env.IS_ELECTRON === true) {
@@ -172,6 +230,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// 未绑定网易云时"退出网易云账号"置灰（ContextMenu 内部元素，需穿透）
+::v-deep .item.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 nav {
   position: fixed;
   top: 0;

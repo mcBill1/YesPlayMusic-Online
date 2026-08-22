@@ -787,21 +787,18 @@
       </div>
 
       <div class="footer">
-        <p class="author"
-          >MADE BY
-          <a href="http://github.com/qier222" target="_blank">QIER222</a></p
-        >
-        <p class="version">v{{ version }}</p>
-
-        <a
-          v-if="!isElectron"
-          href="https://vercel.com/?utm_source=ohmusic&utm_campaign=oss"
-        >
-          <img
-            height="36"
-            src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg"
-          />
-        </a>
+        <p class="author">
+          Made By
+          <a
+            href="https://github.com/mcBill1/YesPlayMusic-Online"
+            target="_blank"
+            >mcBill1</a
+          >
+          Fork From
+          <a href="https://github.com/qier222/YesPlayMusic" target="_blank"
+            >QIER222</a
+          >
+        </p>
       </div>
     </div>
   </div>
@@ -809,12 +806,14 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import { isLooseLoggedIn, doLogout } from '@/utils/auth';
+import { isLooseLoggedIn } from '@/utils/auth';
+import { logoutAccess } from '@/utils/access';
 import { auth as lastfmAuth } from '@/api/lastfm';
-import { 
-  changeAppearance, 
-  changeThemeColor, 
-  bytesToSize } from '@/utils/common';
+import {
+  changeAppearance,
+  changeThemeColor,
+  bytesToSize,
+} from '@/utils/common';
 import { countDBSize, clearDB } from '@/utils/db';
 import pkg from '../../package.json';
 
@@ -1385,9 +1384,14 @@ export default {
         }
       });
     },
-    logout() {
-      doLogout();
-      this.$router.push({ name: 'home' });
+    // 共享账号版：设置页"退出登录"= 退出网页登录（不影响服务器共享的网易云账号）
+    async logout() {
+      try {
+        await logoutAccess();
+      } catch (e) {
+        // session 可能已失效，忽略错误继续清理
+      }
+      window.location.href = '/access/login';
     },
     countDBSize() {
       countDBSize().then(data => {

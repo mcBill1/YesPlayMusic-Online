@@ -116,7 +116,8 @@ import QRCode from 'qrcode';
 import md5 from 'crypto-js/md5';
 import NProgress from 'nprogress';
 import { mapMutations } from 'vuex';
-import { setCookies } from '@/utils/auth';
+import { clearLocalCookies } from '@/utils/auth';
+import { bindNetease, unbindNetease } from '@/utils/access';
 import nativeAlert from '@/utils/nativeAlert';
 import {
   loginWithPhone,
@@ -220,48 +221,73 @@ export default {
         return;
       }
       if (data.code === 200) {
-        setCookies(data.cookie);
-        this.updateData({ key: 'loginMode', value: 'account' });
-        this.$store.dispatch('fetchUserProfile').then(() => {
-          this.$store.dispatch('fetchLikedPlaylist').then(() => {
-            this.$router.push({ path: '/library' });
+        this.processing = false;
+        // 网易云登录成功 → cookie 上传服务器统一保存，本地立即清除
+        bindNetease(data.cookie.replaceAll(' HTTPOnly', ''))
+          .then(() => {
+            clearLocalCookies();
+            this.updateData({ key: 'loginMode', value: 'account' });
+            // 验证绑定有效性：cookie 无效则自动解绑并提示，
+            // 避免用户误以为失败而反复扫码重试（触发网易云风控）
+            return this.$store.dispatch('fetchUserProfile');
+          })
+          .then(profile => {
+            if (!profile) {
+              // 登录态无效：自动解绑服务器，提示重新登录
+              unbindNetease().catch(() => {});
+              this.updateData({ key: 'loginMode', value: null });
+              nativeAlert('网易云登录态无效，请重新登录');
+              return;
+            }
+            this.$store.dispatch('fetchLikedPlaylist').then(() => {
+              this.$router.push({ path: '/library' });
+            });
+          })
+          .catch(err => {
+            nativeAlert(`绑定失败：${err?.response?.data?.msg || err}`);
           });
-        });
       } else {
         this.processing = false;
         nativeAlert(data.msg ?? data.message ?? '账号或密码错误，请检查');
       }
     },
     getQrCodeKey() {
-      return loginQrCodeKey().then(result => {
-        if (result.code === 200) {
-          this.qrCodeKey = result.data.unikey;
-          QRCode.toString(
-            `https://music.163.com/login?codekey=${this.qrCodeKey}`,
-            {
-              width: 192,
-              margin: 0,
-              color: {
-                dark: '#335eea',
-                light: '#00000000',
-              },
-              type: 'svg',
-            }
-          )
-            .then(svg => {
-              this.qrCodeSvg = `data:image/svg+xml;utf8,${encodeURIComponent(
-                svg
-              )}`;
-            })
-            .catch(err => {
-              console.error(err);
-            })
-            .finally(() => {
-              NProgress.done();
-            });
-        }
-        this.checkQrCodeLogin();
-      });
+      return loginQrCodeKey()
+        .then(result => {
+          if (result.code === 200) {
+            this.qrCodeKey = result.data.unikey;
+            QRCode.toString(
+              `https://music.163.com/login?codekey=${this.qrCodeKey}`,
+              {
+                width: 192,
+                margin: 0,
+                color: {
+                  dark: '#000000',
+                  light: '#ffffff',
+                },
+                type: 'svg',
+              }
+            )
+              .then(svg => {
+                this.qrCodeSvg = `data:image/svg+xml;utf8,${encodeURIComponent(
+                  svg
+                )}`;
+              })
+              .catch(err => {
+                console.error(err);
+              })
+              .finally(() => {
+                NProgress.done();
+              });
+          }
+          this.checkQrCodeLogin();
+        })
+        .catch(err => {
+          this.qrCodeInformation = `二维码加载失败：${
+            err?.response?.data?.msg || err
+          }`;
+          NProgress.done();
+        });
     },
     checkQrCodeLogin() {
       // 清除二维码检测
@@ -478,7 +504,7 @@ button.loading {
 }
 
 .qr-code-container {
-  background-color: var(--color-primary-bg);
+  background-color: #ffffff;
   padding: 24px 24px 21px 24px;
   border-radius: 1.25rem;
   margin-bottom: 12px;

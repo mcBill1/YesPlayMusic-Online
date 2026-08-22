@@ -1,9 +1,16 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import store from '@/store';
 import { isLooseLoggedIn, isAccountLoggedIn } from '@/utils/auth';
+import { getStatus } from '@/utils/access';
 
 Vue.use(VueRouter);
 const routes = [
+  {
+    path: '/access/login',
+    name: 'accessLogin',
+    component: () => import('@/views/accessLogin.vue'),
+  },
   {
     path: '/',
     name: 'home',
@@ -144,7 +151,23 @@ VueRouter.prototype.push = function push(location) {
   return originalPush.call(this, location).catch(err => err);
 };
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  // 共享账号版：访问网关检查（服务端 302 兜底，前端守卫防白屏）
+  // 除登录页外，未通过访问密码验证一律去 /access/login
+  if (to.name !== 'accessLogin') {
+    try {
+      const res = await getStatus();
+      if (!res.data?.loggedIn) {
+        return next({ path: '/access/login' });
+      }
+      // 共享网易云绑定 → 同步本地登录标记（换浏览器后自动恢复，无需重新扫码）
+      if (res.data?.ncmBound && !isAccountLoggedIn()) {
+        store.commit('updateData', { key: 'loginMode', value: 'account' });
+      }
+    } catch (e) {
+      return next({ path: '/access/login' });
+    }
+  }
   // 需要登录的逻辑
   if (to.meta.requireAccountLogin) {
     if (isAccountLoggedIn()) {

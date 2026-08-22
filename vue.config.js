@@ -21,7 +21,7 @@ module.exports = {
     },
   },
   pwa: {
-    name: 'YesPlayMusic',
+    name: 'YesPlayMusic-Online',
     iconPaths: {
       favicon32: 'img/icons/favicon-32x32.png',
     },
@@ -38,7 +38,7 @@ module.exports = {
       entry: 'src/main.js',
       template: 'public/index.html',
       filename: 'index.html',
-      title: 'YesPlayMusic',
+      title: 'YesPlayMusic-Online',
       chunks: ['main', 'chunk-vendors', 'chunk-common', 'index'],
     },
   },
@@ -88,15 +88,15 @@ module.exports = {
       nodeIntegration: true,
       externals: ['@unblockneteasemusic/rust-napi'],
       builderOptions: {
-        productName: 'YesPlayMusic',
-        copyright: 'Copyright © YesPlayMusic',
+        productName: 'YesPlayMusic-Online',
+        copyright: 'Copyright © mcBill1',
         // compression: "maximum", // 机器好的可以打开，配置压缩，开启后会让 .AppImage 格式的客户端启动缓慢
         asar: true,
         publish: [
           {
             provider: 'github',
-            owner: 'qier222',
-            repo: 'YesPlayMusic',
+            owner: 'mcBill1',
+            repo: 'YesPlayMusic-Online',
             vPrefixedTagName: true,
             releaseType: 'draft',
           },
@@ -126,7 +126,7 @@ module.exports = {
               arch: ['x64'],
             },
           ],
-          publisherName: 'YesPlayMusic',
+          publisherName: 'mcBill1',
           icon: 'build/icons/icon.ico',
           publish: ['github'],
         },

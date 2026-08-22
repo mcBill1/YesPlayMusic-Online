@@ -1,16 +1,17 @@
-<div align="center">
-	<a href="http://go.warp.dev/YesPlayMusic" target="_blank">
-		<sup>Special thanks to:</sup>
-		<br>
-		<img alt="Warp sponsorship" width="400" src="https://github.com/warpdotdev/brand-assets/blob/main/Github/Sponsor/Warp-Github-LG-03.png?raw=true">
-		<br>
-		<h>Warp is built for coding with multiple AI agents</b>
-		<br>
-		<sup>Available for macOS, Linux and Windows</sup>
-	</a>
-</div>
-
-<br>
+> ## YesPlayMusic Online（服务器共享账号版）
+>
+> 本仓库在 [YesPlayMusic](https://github.com/qier222/YesPlayMusic) 基础上新增 **一机一账号共享登录**：网易云登录态保存在服务器（SQLite），任何浏览器输入访问密码即可使用，无需手机验证码。
+>
+> **主要改动**
+> - 新增 `gateway/`：访问密码认证（Session + scrypt）、IP 限流（错 5 次锁 30 分钟）、XSS/SQL 注入防护、网易云 cookie 服务端注入、UI 设置服务器同步
+> - 服务端未授权拦截：未登录访问任何页面 → 302 到独立登录页，应用本体不加载；`/api/*` 一律 401（网易云凭证只存服务器，浏览器不可见）
+> - 前端：独立登录页（Power By 链接）、路由守卫、网易云登录后自动绑定服务器、右上角双退出（退出网页登录 / 退出网易云账号）
+> - HTTPS 适配：API 响应中 `http://*.music.126.net` 自动升级为 `https://`（Cloudflare Tunnel 边缘部署）
+> - 部署与配置说明见 [gateway/README.md](gateway/README.md)
+>
+> **修复**
+> - 二维码改为固定黑白配色（黑纹白底），解决主题色导致对比度不足、扫码不清的问题
+> - 退出网易云账号时仅清服务器绑定的 cookie，不再连带销毁网页 session，两个登录态独立管理
 
 ---
 
@@ -23,11 +24,6 @@
 
   <p align="center">
     高颜值的第三方网易云播放器
-    <br />
-    <a href="https://music.qier222.com" target="blank"><strong>🌎 访问DEMO</strong></a>&nbsp;&nbsp;|&nbsp;&nbsp;
-    <a href="#%EF%B8%8F-安装" target="blank"><strong>📦️ 下载安装包</strong></a>&nbsp;&nbsp;|&nbsp;&nbsp;
-    <a href="https://t.me/yesplaymusic" target="blank"><strong>💬 加入交流群</strong></a>
-    <br />
     <br />
   </p>
 </p>

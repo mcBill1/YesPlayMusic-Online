@@ -8,10 +8,12 @@ import Player from '@/utils/Player';
 // vuex 自定义插件
 import saveToLocalStorage from './plugins/localStorage';
 import { getSendSettingsPlugin } from './plugins/sendSettings';
+import { getAccessSettingsPlugin } from './plugins/accessSettings';
 
 Vue.use(Vuex);
 
 let plugins = [saveToLocalStorage];
+plugins.push(getAccessSettingsPlugin()); // 共享账号版：UI 设置服务器同步
 if (process.env.IS_ELECTRON === true) {
   let sendSettings = getSendSettingsPlugin();
   plugins.push(sendSettings);

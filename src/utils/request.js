@@ -1,5 +1,6 @@
 import router from '@/router';
-import { doLogout, getCookie } from '@/utils/auth';
+import { getCookie, clearLoginState } from '@/utils/auth';
+import { unbindNetease } from '@/utils/access';
 import axios from 'axios';
 
 let baseURL = '';
@@ -81,10 +82,13 @@ service.interceptors.response.use(
       data.code === 301 &&
       data.msg === '需要登录'
     ) {
-      console.warn('Token has expired. Logout now!');
+      console.warn('Netease token expired. Clearing login state.');
 
-      // 登出帳戶
-      doLogout();
+      // 共享账号版：只清本地登录标记，绝不调网易云 /api/logout
+      // （那会登出服务器共享账号 → 所有浏览器失去登录态 → 反复重绑扫码触发风控）
+      clearLoginState();
+      // 服务器绑定已失效：自动解绑，避免"自动恢复→301→清→刷新→恢复"循环
+      unbindNetease().catch(() => {});
 
       // 導向登入頁面
       if (process.env.IS_ELECTRON === true) {

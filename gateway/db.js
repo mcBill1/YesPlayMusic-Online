@@ -43,6 +43,7 @@ const sessGet = db.prepare('SELECT sess FROM sessions WHERE sid = ?');
 const sessSet = db.prepare(
   'INSERT INTO sessions(sid, sess, expire) VALUES(?, ?, ?) ON CONFLICT(sid) DO UPDATE SET sess = excluded.sess, expire = excluded.expire'
 );
+const sessTouch = db.prepare('UPDATE sessions SET expire = ? WHERE sid = ?');
 const sessDel = db.prepare('DELETE FROM sessions WHERE sid = ?');
 const sessClean = db.prepare('DELETE FROM sessions WHERE expire < ?');
 
@@ -56,6 +57,15 @@ class SqliteStore extends Store {
       ? new Date(sess.cookie.expires).getTime()
       : Date.now() + 24 * 3600 * 1000;
     sessSet.run(sid, JSON.stringify(sess), expires);
+    cb(null);
+  }
+  // rolling:true 时 express-session 对未修改的 session 调 touch 而非 set；
+  // 不实现则 SQLite 的 expire 不滚动，24h 后 session 被定时清理踢登录
+  touch(sid, sess, cb) {
+    const expires = sess.cookie?.expires
+      ? new Date(sess.cookie.expires).getTime()
+      : Date.now() + 24 * 3600 * 1000;
+    sessTouch.run(expires, sid);
     cb(null);
   }
   destroy(sid, cb) {

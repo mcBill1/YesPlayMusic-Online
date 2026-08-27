@@ -3,6 +3,7 @@ const express = require('express');
 const { verifyPassword } = require('./auth');
 const { kv } = require('./db');
 const { rateLimit, recordFail, isLocked, reset } = require('./rateLimit');
+const { refreshNeteaseCookie } = require('./refresh');
 
 const router = express.Router();
 
@@ -40,9 +41,12 @@ router.post('/bind', (req, res) => {
   if (typeof cookie !== 'string' || !cookie.includes('MUSIC_U=') || cookie.length > 4096) {
     return res.status(400).json({ code: 400, msg: 'cookie 无效' });
   }
-  // 只保留 MUSIC_U 与 __csrf（去掉 Max-Age/Expires/Path 等 Set-Cookie 属性噪音）
+  // 只保留 MUSIC_U / __csrf / MUSIC_R_U（去掉 Max-Age/Expires/Path 等 Set-Cookie 属性噪音；
+  // MUSIC_R_U 是 refresh token，MUSIC_U 失效时靠它续期）
   const parts = cookie.split(';').map(s => s.trim());
-  const clean = parts.filter(p => /^MUSIC_U=/.test(p) || /^__csrf=/.test(p));
+  const clean = parts.filter(
+    p => /^MUSIC_U=/.test(p) || /^__csrf=/.test(p) || /^MUSIC_R_U=/.test(p)
+  );
   if (clean.length === 0) {
     return res.status(400).json({ code: 400, msg: 'cookie 无效' });
   }
@@ -58,6 +62,14 @@ router.post('/unbind', (req, res) => {
 
 router.post('/logout', (req, res) => {
   req.session.destroy(() => res.json({ code: 0, msg: 'ok' }));
+});
+
+// 登录态续期：前端收到 301 时先调这里救一次（成功则用户无感，失败才解绑）
+// 60s 节流在 refresh.js 内部，多浏览器并发 301 只真正调一次 refresh
+router.post('/refresh', async (req, res) => {
+  if (!req.session?.loggedIn) return res.status(401).json({ code: 401, msg: '未登录' });
+  const r = await refreshNeteaseCookie();
+  res.json({ code: 0, refreshed: !!r.ok });
 });
 
 // --- UI 设置服务器同步（共享给所有登录浏览器）---

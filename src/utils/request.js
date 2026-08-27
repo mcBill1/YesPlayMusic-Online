@@ -1,6 +1,6 @@
 import router from '@/router';
 import { getCookie, clearLoginState } from '@/utils/auth';
-import { unbindNetease } from '@/utils/access';
+import { unbindNetease, refreshNetease } from '@/utils/access';
 import axios from 'axios';
 
 let baseURL = '';
@@ -82,6 +82,22 @@ service.interceptors.response.use(
       data.code === 301 &&
       data.msg === '需要登录'
     ) {
+      // 先尝试续期一次：服务器用 MUSIC_R_U refresh token 调 /login/refresh 救登录态
+      // 成功 → 重试原请求一次（_ncmRetried 标记防循环），用户无感
+      // 失败/已重试过 → 走解绑流程（绝不调网易云 /api/logout，防风控）
+      if (!error.config?._ncmRetried) {
+        try {
+          const r = await refreshNetease();
+          if (r.data?.code === 0 && r.data?.refreshed) {
+            console.warn('Netease token refreshed, retrying request once.');
+            error.config._ncmRetried = true;
+            return service(error.config);
+          }
+        } catch (e) {
+          /* 续期接口本身失败（未登录 session 等）→ 走解绑流程 */
+        }
+      }
+
       console.warn('Netease token expired. Clearing login state.');
 
       // 共享账号版：只清本地登录标记，绝不调网易云 /api/logout

@@ -29,6 +29,11 @@ export function unbindNetease() {
   return access.post('/unbind');
 }
 
+// 登录态续期：前端收到 301 时先调一次，成功则用户无感续命，失败才解绑
+export function refreshNetease() {
+  return access.post('/refresh');
+}
+
 // 退出网页登录（仅销毁当前浏览器 session）
 export function logoutAccess() {
   return access.post('/logout');

@@ -2,6 +2,7 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const http = require('http');
 const { kv } = require('./db');
+const { extractFreshCookies } = require('./refresh');
 
 
 // 所有 /api 请求必须先通过访问密码 session
@@ -38,6 +39,15 @@ const proxy = createProxyMiddleware({
       }
     },
     proxyRes(proxyRes, req, res) {
+      // 被动续期（方案B）：响应 Set-Cookie 带新 MUSIC_U 时同步更新 kv（过滤 MUSIC_A_T/MUSIC_R_T 噪音）
+      const fresh = extractFreshCookies(proxyRes.headers['set-cookie']);
+      if (fresh && fresh !== kv.get('netease_cookie')) {
+        kv.set('netease_cookie', fresh);
+        console.log(`[proxy] cookie refreshed from response Set-Cookie @ ${new Date().toISOString()}`);
+      }
+      // 安全：剥离网易云 Set-Cookie，浏览器不接收任何网易云 cookie（共享 cookie 只在服务器）
+      delete proxyRes.headers['set-cookie'];
+
       // HTTPS 页面下 http 的网易云 CDN 资源会被浏览器 mixed content 拦截，
       // 统一把 JSON 响应里的 http://*.music.126.net 升级为 https://
       const ctype = proxyRes.headers['content-type'] || '';

@@ -92,14 +92,19 @@ function refreshNeteaseCookie() {
 }
 
 // 下一次 7:00-8:00 之间的随机时刻（服务器时区 Asia/Shanghai）
+// 关键：7-8 点窗口内（含执行完 refresh 后）一律排明天——一天最多一次，
+// 避免"窗口内执行→重排到窗口内"连环触发（曾出现一天 4 次 refresh 的可疑行为）
 function nextRefreshTime() {
   const now = new Date();
   const today7 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0, 0);
-  let base = today7.getTime();
-  if (now.getTime() >= base + 3600 * 1000) {
-    base += 24 * 3600 * 1000; // 已过 8 点 → 明天
-  } else if (now.getTime() >= base) {
-    base = now.getTime() + 60 * 1000; // 正好在 7-8 点窗口 → 至少 1 分钟后
+  const today8 = today7.getTime() + 3600 * 1000;
+  let base;
+  if (now.getTime() < today7.getTime()) {
+    base = today7.getTime(); // 7 点前 → 今天 7-8 点
+  } else if (now.getTime() < today8) {
+    base = today8; // 7-8 点窗口内 → 明天（今天不再刷）
+  } else {
+    base = today7.getTime() + 24 * 3600 * 1000; // 8 点后 → 明天
   }
   return base + Math.floor(Math.random() * 3600 * 1000); // 0 ~ 59:59.999
 }

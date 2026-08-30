@@ -30,9 +30,16 @@ const proxy = createProxyMiddleware({
     },
     proxyReq(proxyReq, req) {
       // 注入网易云 cookie 到 query 参数（沿用原前端 config.params.cookie 约定）
-      // 登录类接口不注入（避免旧 cookie 干扰登录）
+      // 仅登录态获取/登出类接口不注入（避免旧 cookie 干扰登录流程、或误登出共享账号）
+      // 注意：/login/refresh 是续期接口，必须注入——否则必然 301 → 前端续期失败误解绑踢人
       const cookie = kv.get('netease_cookie');
-      const isLoginRoute = /\/login(\/|$|\?)/.test(req.url);
+      const NO_INJECT = [
+        '/login/qr/key', '/login/qr/create', '/login/qr/check',
+        '/login/cellphone', '/login/email', '/login/password',
+        '/login/anonymous', '/login/captcha/sent', '/login/captcha/verify',
+        '/register/anonimous', '/logout',
+      ];
+      const isLoginRoute = NO_INJECT.some(p => req.url.startsWith(p));
       if (cookie && !isLoginRoute && !req.url.includes('cookie=')) {
         const sep = req.url.includes('?') ? '&' : '?';
         proxyReq.path += sep + 'cookie=' + encodeURIComponent(cookie);

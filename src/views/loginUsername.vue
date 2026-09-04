@@ -202,4 +202,12 @@ export default {
     color: var(--color-primary);
   }
 }
+
+@media (max-width: 480px) {
+  .search-box .container {
+    width: 100%;
+    max-width: 326px;
+    box-sizing: border-box;
+  }
+}
 </style>

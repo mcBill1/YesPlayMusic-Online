@@ -2,8 +2,12 @@
   <transition name="slide-up">
     <div
       class="lyrics-page"
-      :class="{ 'no-lyric': noLyric }"
+      :class="{
+        'no-lyric': noLyric,
+        'mobile-lyrics-mode': mobileMode === 'lyrics',
+      }"
       :data-theme="theme"
+      @click="onBlankClick"
     >
       <div
         v-if="
@@ -37,14 +41,18 @@
           </div>
           <div class="cover">
             <div class="cover-container">
-              <img :src="imageUrl" loading="lazy" />
+              <img
+                :src="imageUrl"
+                loading="lazy"
+                @click.stop="setMobileLyricsMode"
+              />
               <div
                 class="shadow"
                 :style="{ backgroundImage: `url(${imageUrl})` }"
               ></div>
             </div>
           </div>
-          <div class="controls">
+          <div class="controls" @click.stop>
             <div class="top-part">
               <div class="track-info">
                 <div class="title" :title="currentTrack.name">
@@ -244,8 +252,8 @@
               :class="{
                 highlight: highlightLyricIndex === index,
               }"
-              @click="clickLyricLine(line.time)"
-              @dblclick="clickLyricLine(line.time, true)"
+              @click.stop="clickLyricLine(line.time)"
+              @dblclick.stop="clickLyricLine(line.time, true)"
             >
               <div class="content">
                 <span
@@ -265,7 +273,7 @@
                 >
               </div>
             </div>
-            <ContextMenu v-if="!noLyric" ref="lyricMenu">
+            <ContextMenu v-if="!noLyric" ref="lyricMenu" @click.stop.native>
               <div class="item" @click="copyLyric(false)">{{
                 $t('contextMenu.copyLyric')
               }}</div>
@@ -283,12 +291,12 @@
           </div>
         </transition>
       </div>
-      <div class="close-button" @click="toggleLyrics">
+      <div class="close-button" @click.stop="toggleLyrics">
         <button>
           <svg-icon icon-class="arrow-down" />
         </button>
       </div>
-      <div class="close-button" style="left: 24px" @click="fullscreen">
+      <div class="close-button" style="left: 24px" @click.stop="fullscreen">
         <button>
           <svg-icon v-if="isFullscreen" icon-class="fullscreen-exit" />
           <svg-icon v-else icon-class="fullscreen" />
@@ -331,6 +339,7 @@ export default {
       lyricType: 'translation', // or 'romaPronunciation'
       highlightLyricIndex: -1,
       minimize: true,
+      mobileMode: 'cover', // 移动端全屏播放页模式：cover 封面 | lyrics 歌词
       background: '',
       date: this.formatTime(new Date()),
       isFullscreen: !!document.fullscreenElement,
@@ -453,6 +462,7 @@ export default {
     },
     showLyrics(show) {
       if (show) {
+        this.mobileMode = 'cover'; // 每次打开全屏默认进入封面模式
         this.setLyricsInterval();
         this.$store.commit('enableScrolling', false);
       } else {
@@ -486,6 +496,16 @@ export default {
   methods: {
     ...mapMutations(['toggleLyrics', 'updateModal']),
     ...mapActions(['likeATrack']),
+    setMobileLyricsMode() {
+      if (this.noLyric) return; // 无歌词时不进入歌词模式
+      this.mobileMode = 'lyrics';
+    },
+    onBlankClick() {
+      // 移动端歌词模式下点击空白处返回封面模式；封面模式下不动作，关闭仅靠右上角按钮
+      if (this.mobileMode === 'lyrics') {
+        this.mobileMode = 'cover';
+      }
+    },
     initDate() {
       var _this = this;
       clearInterval(this.timer);
@@ -1079,6 +1099,205 @@ export default {
 
   .right-side .lyrics-container {
     max-width: 100%;
+  }
+}
+
+/* 移动端全屏播放页：封面模式（默认）/ 歌词模式切换
+   覆盖上方 max-aspect-ratio: 10/9 在移动端的"只显歌词"行为 */
+@media (max-width: 768px) {
+  .lyrics-page {
+    flex-direction: column;
+  }
+
+  /* 封面模式（默认）：显示左侧封面 + 时钟 + 控件，隐藏歌词 */
+  .left-side {
+    display: flex !important; /* 覆盖 max-aspect-ratio 的 display: none */
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box; /* width:100% + 左右 padding 不再溢出视口 */
+    margin: 0;
+    padding: 56px 16px 24px;
+    justify-content: center;
+    align-items: flex-start; /* 配合子元素 margin:auto 垂直居中，超高时可滚动 */
+    overflow-y: auto;
+  }
+  .left-side > div {
+    width: 100%;
+    min-width: 0;
+    margin: auto 0; /* 垂直居中；内容超高时自动贴合顶部，保证底部控件可见 */
+  }
+  .right-side {
+    display: none;
+  }
+  /* 封面随屏幕宽高自适应，并整体水平居中 */
+  .cover-container {
+    width: min(70vw, 44vh);
+    height: min(70vw, 44vh);
+    margin: 0 auto;
+  }
+  .cover img,
+  .cover .shadow {
+    width: min(70vw, 44vh);
+    height: min(70vw, 44vh);
+  }
+  .cover img {
+    display: block;
+    cursor: pointer;
+  }
+  .left-side .date {
+    margin: min(3vw, 12px) 0;
+    font-size: clamp(14px, 3.2vw, 24px);
+  }
+  .left-side .controls {
+    max-width: none;
+    width: 100%;
+    margin-top: 12px;
+  }
+  .left-side .controls .title {
+    font-size: clamp(14px, 3vw, 22px);
+  }
+  .left-side .controls .subtitle {
+    font-size: clamp(10px, 2.2vw, 16px);
+  }
+  /* 标题一行放不下时自动分两行：标题独占第一行，声音/喜欢/加歌单换到第二行 */
+  .left-side .controls .top-part {
+    flex-wrap: wrap;
+  }
+  .left-side .controls .top-part .track-info {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-right: 4px;
+  }
+  .left-side .controls .top-part .top-right {
+    flex: 1 1 auto;
+  }
+  .left-side .controls .top-part .top-right .volume-control,
+  .left-side .controls .top-part .top-right .buttons {
+    flex-shrink: 0;
+  }
+  /* 保留音量控件，音量条宽度同步动态缩放（534px 时为桌面 84px） */
+  .left-side .controls .top-part .top-right .volume-control {
+    display: flex;
+    margin: 0 min(1.9vw, 10px);
+    .volume-bar {
+      width: min(15.7vw, 84px);
+    }
+  }
+  /* 所有按钮随屏幕宽度连续等比缩放：534px 时达到 100% 桌面尺寸，更窄时动态缩小 */
+  .left-side .controls .button-icon {
+    padding: min(1.5vw, 8px);
+    margin: min(0.75vw, 4px);
+  }
+  .left-side .controls .top-part .top-right .buttons .svg-icon {
+    width: clamp(12px, 3.4vw, 18px);
+    height: clamp(12px, 3.4vw, 18px);
+  }
+  .left-side .controls .media-controls .svg-icon {
+    width: clamp(10px, 2.6vw, 14px);
+    height: clamp(10px, 2.6vw, 14px);
+  }
+  .left-side .controls .media-controls .middle {
+    padding: 0 min(3vw, 16px);
+    button {
+      margin: 0 min(1.5vw, 8px);
+    }
+    .svg-icon {
+      width: clamp(15px, 4.1vw, 22px);
+      height: clamp(15px, 4.1vw, 22px);
+    }
+    button#play .svg-icon {
+      width: clamp(19px, 5.25vw, 28px);
+      height: clamp(19px, 5.25vw, 28px);
+    }
+  }
+  .left-side .controls .progress-bar {
+    margin-top: min(2.6vw, 14px);
+  }
+  .left-side .controls .progress-bar span {
+    font-size: clamp(10px, 2.1vw, 15px);
+  }
+  .left-side .controls .media-controls {
+    margin-top: min(2.4vw, 12px);
+  }
+  /* no-lyric 桌面端用 translateX 居中，移动端已居中无需位移 */
+  .lyrics-page.no-lyric .left-side {
+    transform: none;
+    margin-right: 0;
+  }
+
+  /* 歌词模式：隐藏封面和时钟，歌词在上、控件在下，点击空白返回封面模式 */
+  .lyrics-page.mobile-lyrics-mode {
+    .left-side {
+      order: 2;
+      flex: none;
+      padding: 12px 16px 24px;
+      overflow-y: visible;
+    }
+    .left-side > div {
+      margin: 0;
+    }
+    .left-side .cover,
+    .left-side .date {
+      display: none;
+    }
+    .left-side .controls {
+      margin-top: 0;
+    }
+    .right-side {
+      display: block;
+      order: 1;
+      flex: 1;
+      width: 100%;
+      margin: 0;
+      min-height: 0;
+      /* 歌词区域不占满全屏，两侧留空白可点击返回封面模式 */
+      .lyrics-container {
+        max-width: 82%;
+        margin: 0 auto;
+        padding-left: 0;
+        padding-right: 0;
+        /* 歌词字号随屏幕宽度自适应（覆盖设置里的行内字号） */
+        font-size: min(4.8vw, 20px) !important;
+      }
+    }
+  }
+
+  .close-button {
+    top: 12px;
+    height: 48px;
+    width: 48px;
+  }
+}
+
+/* 横屏矮屏：隐藏时钟并进一步压缩封面，保证底部控件完整可见 */
+@media (max-width: 768px) and (max-height: 480px) {
+  .left-side .date {
+    display: none;
+  }
+  .cover-container,
+  .cover img,
+  .cover .shadow {
+    width: min(50vw, 36vh);
+    height: min(50vw, 36vh);
+  }
+}
+
+@media (max-width: 480px) {
+  .left-side {
+    padding: 48px 12px 16px;
+  }
+  .cover-container,
+  .cover img,
+  .cover .shadow {
+    width: min(72vw, 40vh);
+    height: min(72vw, 40vh);
+  }
+  .lyrics-page.mobile-lyrics-mode .right-side .lyrics-container {
+    max-width: 88%;
+    font-size: min(5vw, 20px) !important;
   }
 }
 

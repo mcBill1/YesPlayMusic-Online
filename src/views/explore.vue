@@ -300,4 +300,27 @@ h1 {
     width: 24px;
   }
 }
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 28px;
+  }
+  .button {
+    font-size: 16px;
+    padding: 6px 12px;
+    margin: 8px 10px 4px 0;
+  }
+  .playlists {
+    margin-top: 16px;
+  }
+  .panel .big-cat {
+    flex-direction: column;
+    .name {
+      margin-left: 12px;
+    }
+    .cats {
+      margin-left: 12px;
+    }
+  }
+}
 </style>

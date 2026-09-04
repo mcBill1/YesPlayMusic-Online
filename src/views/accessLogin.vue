@@ -152,4 +152,13 @@ export default {
     }
   }
 }
+
+@media (max-width: 480px) {
+  .access-login .card {
+    width: auto;
+    max-width: 340px;
+    margin: 0 16px;
+    padding: 36px 20px 28px;
+  }
+}
 </style>

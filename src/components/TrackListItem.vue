@@ -445,4 +445,26 @@ button {
     opacity: 0.78;
   }
 }
+
+@media (max-width: 768px) {
+  .track {
+    .album {
+      display: none;
+    }
+    .no {
+      margin: 0 8px 0 2px;
+    }
+    img {
+      margin-right: 12px;
+    }
+    .time,
+    .count {
+      width: 40px;
+      margin-right: 2px;
+    }
+  }
+  .actions {
+    width: auto;
+  }
+}
 </style>

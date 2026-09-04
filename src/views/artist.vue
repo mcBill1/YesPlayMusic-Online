@@ -553,4 +553,25 @@ export default {
   overflow: hidden;
   white-space: pre-line;
 }
+
+@media (max-width: 768px) {
+  .artist-info {
+    flex-direction: column;
+    text-align: center;
+    img {
+      height: 180px;
+      width: 180px;
+      margin-right: 0;
+    }
+    .name {
+      font-size: 30px;
+    }
+    .buttons {
+      justify-content: center;
+    }
+  }
+  .latest-mv img {
+    max-width: 100%;
+  }
+}
 </style>

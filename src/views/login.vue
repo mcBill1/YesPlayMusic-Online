@@ -70,7 +70,14 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  // 192px = 64px navbar + 64px player + 64px 冗余；移动端 navbar 缩为 56px 后同步调整为 176px
   height: calc(100vh - 192px);
+}
+
+@media (max-width: 768px) {
+  .login {
+    height: calc(100vh - 176px);
+  }
 }
 
 .section-1 {

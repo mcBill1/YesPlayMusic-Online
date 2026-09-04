@@ -514,4 +514,17 @@ button.loading {
   text-align: center;
   margin-bottom: 28px;
 }
+
+@media (max-width: 480px) {
+  .search-box .container,
+  .notice {
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+  }
+  .confirm button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
 </style>

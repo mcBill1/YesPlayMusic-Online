@@ -167,6 +167,20 @@ export default {
   }
 }
 
+/* 移动端列数收窄：覆盖行内 style 的 grid-template-columns */
+@media (max-width: 768px) {
+  .cover-row {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .cover-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
 .explicit-symbol {
   opacity: 0.28;
   color: var(--color-text);

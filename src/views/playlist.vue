@@ -945,4 +945,41 @@ export default {
   justify-content: center;
   margin-top: 32px;
 }
+
+@media (max-width: 768px) {
+  .playlist-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 48px;
+    .info {
+      margin-left: 0;
+      margin-top: 24px;
+      align-items: center;
+      .title {
+        font-size: 28px;
+      }
+      .buttons {
+        justify-content: center;
+      }
+    }
+    .search-box {
+      position: static;
+      margin-top: 16px;
+    }
+  }
+  .special-playlist {
+    margin-top: 96px;
+    margin-bottom: 64px;
+    .title {
+      font-size: 40px;
+      img {
+        height: 40px;
+      }
+    }
+  }
+  .user-info h1 {
+    font-size: 28px;
+  }
+}
 </style>

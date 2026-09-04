@@ -46,4 +46,10 @@ h1 {
   color: var(--color-text);
   font-size: 56px;
 }
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 28px;
+  }
+}
 </style>

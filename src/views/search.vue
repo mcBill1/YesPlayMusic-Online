@@ -1,5 +1,15 @@
 <template>
   <div v-show="show" class="search-page">
+    <!-- 移动端搜索入口：导航栏搜索图标跳转到本页后输入关键字 -->
+    <div class="search-input-box">
+      <svg-icon icon-class="search" />
+      <input
+        v-model="inputKeywords"
+        type="search"
+        :placeholder="$t('nav.search')"
+        @keydown.enter="doSearch"
+      />
+    </div>
     <div v-show="artists.length > 0 || albums.length > 0" class="row">
       <div v-show="artists.length > 0" class="artists">
         <div v-show="artists.length > 0" class="section-title"
@@ -109,6 +119,7 @@ export default {
       albums: [],
       playlists: [],
       musicVideos: [],
+      inputKeywords: '',
     };
   },
   computed: {
@@ -137,6 +148,14 @@ export default {
   },
   methods: {
     ...mapActions(['showToast']),
+    doSearch() {
+      if (!this.inputKeywords) return;
+      if (this.$route.params.keywords === this.inputKeywords) return;
+      this.$router.push({
+        name: 'search',
+        params: { keywords: this.inputKeywords },
+      });
+    },
     playTrackInSearchResult(id) {
       let track = this.tracks.find(t => t.id === id);
       this.$store.state.player.appendTrackToPlayerList(track, true);
@@ -226,6 +245,38 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.search-input-box {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .search-input-box {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    margin-top: 8px;
+    background: var(--color-secondary-bg-for-transparent);
+    border-radius: 8px;
+    .svg-icon {
+      height: 16px;
+      width: 16px;
+      margin: 0 8px 0 12px;
+      color: var(--color-text);
+      opacity: 0.28;
+    }
+    input {
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      font-weight: 600;
+      width: 100%;
+      min-width: 0;
+      padding-right: 12px;
+      color: var(--color-text);
+    }
+  }
+}
+
 .section-title {
   font-weight: 600;
   font-size: 22px;
@@ -283,6 +334,15 @@ export default {
     height: 24px;
     width: 24px;
     margin-right: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+    .artists {
+      margin-right: 0;
+    }
   }
 }
 </style>

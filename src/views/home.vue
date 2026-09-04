@@ -202,4 +202,36 @@ footer {
   gap: 24px;
   margin-bottom: 78px;
 }
+
+@media (max-width: 768px) {
+  .index-row {
+    margin-top: 36px;
+  }
+  .index-row.first-row {
+    margin-top: 24px;
+  }
+  .title {
+    margin-bottom: 12px;
+  }
+  .for-you-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .playlists {
+    margin: {
+      right: 0;
+      left: 0;
+    }
+    .index-playlist {
+      margin: 12px 0 24px 0;
+      max-width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 22px;
+  }
+}
 </style>

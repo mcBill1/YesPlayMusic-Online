@@ -133,6 +133,18 @@ main {
   }
 }
 
+@media (max-width: 768px) {
+  main {
+    padding: 56px 16px 96px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 56px 12px 88px 12px;
+  }
+}
+
 main::-webkit-scrollbar {
   width: 0px;
 }

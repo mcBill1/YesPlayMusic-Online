@@ -437,4 +437,25 @@ export default {
   overflow: hidden;
   white-space: pre-line;
 }
+
+@media (max-width: 768px) {
+  .playlist-info {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 48px;
+    .info {
+      margin-left: 0;
+      margin-top: 24px;
+      align-items: center;
+      .title {
+        font-size: 28px;
+      }
+      .buttons {
+        justify-content: center;
+      }
+    }
+  }
+}
 </style>

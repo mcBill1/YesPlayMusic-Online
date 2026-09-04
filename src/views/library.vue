@@ -621,4 +621,41 @@ button.playHistory-button--selected {
     transform: none;
   }
 }
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 28px;
+    .avatar {
+      height: 32px;
+      margin-right: 8px;
+    }
+  }
+  .section-one {
+    flex-direction: column;
+    margin-top: 16px;
+    .liked-songs {
+      flex: none;
+      padding: 14px 16px;
+      .bottom .title {
+        font-size: 20px;
+      }
+    }
+    .songs {
+      flex: none;
+      width: 100%;
+      margin-left: 0;
+      margin-top: 24px;
+    }
+  }
+  .section-two {
+    margin-top: 32px;
+  }
+  .tabs {
+    font-size: 16px;
+    .tab {
+      padding: 6px 10px;
+      margin-right: 8px;
+    }
+  }
+}
 </style>

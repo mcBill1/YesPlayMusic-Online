@@ -10,6 +10,15 @@ module.exports = {
   devServer: {
     disableHostCheck: true,
     port: process.env.DEV_SERVER_PORT || 8080,
+    // 本地开发无网关（gateway/）：mock 访问状态，绕过登录拦截（仅 devServer 生效）
+    before: app => {
+      app.get('/access/status', (req, res) => {
+        res.json({ loggedIn: true, ncmBound: false });
+      });
+      app.get('/access/settings', (req, res) => {
+        res.json({ code: 0, data: {} });
+      });
+    },
     proxy: {
       '^/api': {
         target: 'http://localhost:3000',

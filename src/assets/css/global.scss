@@ -79,6 +79,13 @@ html {
   overscroll-behavior: none;
 }
 
+@media (max-width: 768px) {
+  html {
+    min-width: unset;
+    overscroll-behavior: contain;
+  }
+}
+
 select,
 button {
   font-family: inherit;
@@ -130,6 +137,17 @@ a {
 
 [data-theme='dark'] ::-webkit-scrollbar-thumb {
   background: var(--color-secondary-bg);
+}
+
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 0;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+    border: none;
+  }
 }
 
 .user-select-none {

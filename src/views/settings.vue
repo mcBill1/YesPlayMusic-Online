@@ -1839,4 +1839,16 @@ input[type='number'] {
 .toggle input:checked + label:after {
   left: 26px;
 }
+
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+  }
+  h2 {
+    font-size: 28px;
+  }
+  h3 {
+    font-size: 22px;
+  }
+}
 </style>

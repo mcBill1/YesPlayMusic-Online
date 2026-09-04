@@ -43,6 +43,10 @@
             </div>
           </div>
         </div>
+        <!-- 移动端用图标代替搜索框，点击跳转搜索页 -->
+        <button-icon class="search-button" @click.native="toSearch">
+          <svg-icon icon-class="search" />
+        </button-icon>
         <img
           class="avatar"
           :src="avatarUrl"
@@ -159,6 +163,10 @@ export default {
         params: { keywords: this.keywords },
       });
     },
+    toSearch() {
+      if (this.$route.name === 'search') return;
+      this.$router.push({ name: 'search' });
+    },
     showUserProfileMenu(e) {
       this.$refs.userProfileMenu.openMenu(e);
     },
@@ -262,6 +270,13 @@ nav {
   }
 }
 
+@media (max-width: 768px) {
+  nav {
+    padding: 0 16px;
+    height: 56px;
+  }
+}
+
 @supports (-moz-appearance: none) {
   nav {
     background-color: var(--color-body-bg);
@@ -324,6 +339,35 @@ nav.has-custom-titlebar {
   }
 }
 
+@media (max-width: 768px) {
+  /* 左右两侧等宽，使中间导航链接组相对页面水平居中；
+     左上角返回/前进按钮同步动态缩放（534px 时为桌面 100%） */
+  .navigation-buttons {
+    flex: 1;
+    .button-icon {
+      padding: min(1.5vw, 8px);
+      margin: min(0.75vw, 4px);
+      .svg-icon {
+        width: clamp(15px, 4.5vw, 24px);
+        height: clamp(15px, 4.5vw, 24px);
+      }
+    }
+  }
+  /* 移动端显示导航链接（首页/发现/音乐库），尺寸随屏幕宽度动态等比缩放：
+     534px 时达到 100% 桌面尺寸，更窄时按比例缩小。
+     nowrap + line-height:1 防止空间不足时文字换行导致链接被顶出导航栏 */
+  .navigation-links {
+    align-items: center;
+    a {
+      font-size: clamp(13px, 3.37vw, 18px);
+      line-height: 1;
+      white-space: nowrap;
+      padding: min(1.12vw, 6px) min(1.87vw, 10px);
+      margin: 0 min(2.25vw, 12px);
+    }
+  }
+}
+
 .search {
   .svg-icon {
     height: 18px;
@@ -372,6 +416,20 @@ nav.has-custom-titlebar {
     .svg-icon {
       opacity: 1;
       color: var(--color-primary);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  /* 移动端隐藏搜索框，改为搜索图标按钮 */
+  nav .right-part .search-box {
+    display: none;
+  }
+  nav .right-part .search-button {
+    display: flex;
+    .svg-icon {
+      height: 20px;
+      width: 20px;
     }
   }
 }

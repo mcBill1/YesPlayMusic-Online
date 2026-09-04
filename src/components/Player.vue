@@ -170,7 +170,6 @@
           <button-icon
             class="lyrics-button"
             title="歌词"
-            style="margin-left: 12px"
             @click.native="toggleLyrics"
             ><svg-icon icon-class="arrow-up"
           /></button-icon>
@@ -487,6 +486,10 @@ export default {
   margin-left: 16px;
 }
 
+.lyrics-button {
+  margin-left: 12px;
+}
+
 .button-icon.disabled {
   cursor: default;
   opacity: 0.38;
@@ -495,6 +498,81 @@ export default {
   }
   &:active {
     transform: unset;
+  }
+}
+
+/* 移动端底部播放条：放在基础规则之后，确保覆盖生效。
+   所有尺寸用 vw/clamp 随屏幕宽度连续等比缩放：
+   534px 时约为桌面 70%，768px 达到桌面尺寸 */
+@media (max-width: 768px) {
+  .player .controls {
+    padding: 0 10px;
+    /* 左列优先占满剩余空间给歌名，中/右列按内容收缩 */
+    grid-template-columns: minmax(100px, 1fr) auto auto;
+    .button-icon {
+      padding: min(1vw, 8px);
+      margin: min(0.7vw, 4px);
+      .svg-icon {
+        width: clamp(10px, 2.15vw, 16px);
+        height: clamp(10px, 2.15vw, 16px);
+      }
+    }
+  }
+  /* 移动端保留音量图标按钮，仅隐藏较宽的拖动条 */
+  .player .right-control-buttons .container .volume-control {
+    display: flex;
+  }
+  .player .right-control-buttons .container .volume-control .volume-bar {
+    display: none;
+  }
+  .playing .container {
+    min-width: 0;
+    img {
+      height: clamp(22px, 5.2vw, 40px);
+    }
+    .track-info {
+      flex: 1;
+      min-width: 0;
+      margin-left: clamp(6px, 1.5vw, 12px);
+      margin-right: 2px;
+      .name {
+        font-size: clamp(11px, 2.15vw, 15px);
+      }
+      .artist {
+        font-size: clamp(8px, 1.7vw, 11px);
+      }
+    }
+  }
+  .player .middle-control-buttons .container {
+    padding: 0;
+    .play {
+      height: clamp(28px, 5.6vw, 42px);
+      width: clamp(28px, 5.6vw, 42px);
+      .svg-icon {
+        width: clamp(15px, 3.2vw, 24px);
+        height: clamp(15px, 3.2vw, 24px);
+      }
+    }
+  }
+  .player .like-button {
+    margin-left: min(1.2vw, 8px);
+  }
+  .player .lyrics-button {
+    margin-left: min(1vw, 6px);
+  }
+  .player .right-control-buttons .container .expand {
+    margin-left: min(1.2vw, 8px);
+    .svg-icon {
+      width: clamp(14px, 3.2vw, 24px);
+      height: clamp(14px, 3.2vw, 24px);
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  /* 小屏宽度不足以容纳音量按钮，音量交给系统按键 */
+  .player .right-control-buttons .container .volume-control {
+    display: none;
   }
 }
 </style>

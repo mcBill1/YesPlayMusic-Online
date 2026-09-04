@@ -129,4 +129,17 @@ export default {
 .gradient {
   background: linear-gradient(to left, #dd2476, #ff512f);
 }
+
+@media (max-width: 768px) {
+  .special-playlist {
+    margin-top: 96px;
+    margin-bottom: 64px;
+    .title {
+      font-size: 40px;
+      img {
+        height: 40px;
+      }
+    }
+  }
+}
 </style>

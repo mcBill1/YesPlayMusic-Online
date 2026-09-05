@@ -43,8 +43,8 @@ const excludeSaveKeys = [
 
 function setTitle(track) {
   document.title = track
-    ? `${track.name} · ${track.ar[0].name} - YesPlayMusic`
-    : 'YesPlayMusic';
+    ? `${track.name} · ${track.ar[0].name} - YesPlayMusic-Online`
+    : 'YesPlayMusic-Online';
   if (isCreateTray) {
     ipcRenderer?.send('updateTrayTooltip', document.title);
   }

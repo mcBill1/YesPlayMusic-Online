@@ -1102,37 +1102,33 @@ export default {
   }
 }
 
-/* 移动端全屏播放页：封面模式（默认）/ 歌词模式切换
-   覆盖上方 max-aspect-ratio: 10/9 在移动端的"只显歌词"行为 */
 @media (max-width: 768px) {
   .lyrics-page {
     flex-direction: column;
   }
 
-  /* 封面模式（默认）：显示左侧封面 + 时钟 + 控件，隐藏歌词 */
   .left-side {
-    display: flex !important; /* 覆盖 max-aspect-ratio 的 display: none */
+    display: flex !important;
     flex: 1;
     width: 100%;
     max-width: 100%;
     min-width: 0;
     min-height: 0;
-    box-sizing: border-box; /* width:100% + 左右 padding 不再溢出视口 */
+    box-sizing: border-box;
     margin: 0;
     padding: 56px 16px 24px;
     justify-content: center;
-    align-items: flex-start; /* 配合子元素 margin:auto 垂直居中，超高时可滚动 */
+    align-items: flex-start;
     overflow-y: auto;
   }
   .left-side > div {
     width: 100%;
     min-width: 0;
-    margin: auto 0; /* 垂直居中；内容超高时自动贴合顶部，保证底部控件可见 */
+    margin: auto 0;
   }
   .right-side {
     display: none;
   }
-  /* 封面随屏幕宽高自适应，并整体水平居中 */
   .cover-container {
     width: min(70vw, 44vh);
     height: min(70vw, 44vh);
@@ -1148,8 +1144,8 @@ export default {
     cursor: pointer;
   }
   .left-side .date {
-    margin: min(3vw, 12px) 0;
-    font-size: clamp(14px, 3.2vw, 24px);
+    margin: min(3vw, 12px) auto;
+    font-size: clamp(28px, 6.4vw, 48px);
   }
   .left-side .controls {
     max-width: none;
@@ -1162,7 +1158,6 @@ export default {
   .left-side .controls .subtitle {
     font-size: clamp(10px, 2.2vw, 16px);
   }
-  /* 标题一行放不下时自动分两行：标题独占第一行，声音/喜欢/加歌单换到第二行 */
   .left-side .controls .top-part {
     flex-wrap: wrap;
   }
@@ -1178,7 +1173,6 @@ export default {
   .left-side .controls .top-part .top-right .buttons {
     flex-shrink: 0;
   }
-  /* 保留音量控件，音量条宽度同步动态缩放（534px 时为桌面 84px） */
   .left-side .controls .top-part .top-right .volume-control {
     display: flex;
     margin: 0 min(1.9vw, 10px);
@@ -1186,7 +1180,6 @@ export default {
       width: min(15.7vw, 84px);
     }
   }
-  /* 所有按钮随屏幕宽度连续等比缩放：534px 时达到 100% 桌面尺寸，更窄时动态缩小 */
   .left-side .controls .button-icon {
     padding: min(1.5vw, 8px);
     margin: min(0.75vw, 4px);
@@ -1195,22 +1188,26 @@ export default {
     width: clamp(12px, 3.4vw, 18px);
     height: clamp(12px, 3.4vw, 18px);
   }
+  .left-side .controls .media-controls .button-icon {
+    padding: min(2.25vw, 12px);
+    margin: min(1.125vw, 6px);
+  }
   .left-side .controls .media-controls .svg-icon {
-    width: clamp(10px, 2.6vw, 14px);
-    height: clamp(10px, 2.6vw, 14px);
+    width: clamp(15px, 3.9vw, 21px);
+    height: clamp(15px, 3.9vw, 21px);
   }
   .left-side .controls .media-controls .middle {
-    padding: 0 min(3vw, 16px);
+    padding: 0 min(4.5vw, 24px);
     button {
-      margin: 0 min(1.5vw, 8px);
+      margin: 0 min(2.25vw, 12px);
     }
     .svg-icon {
-      width: clamp(15px, 4.1vw, 22px);
-      height: clamp(15px, 4.1vw, 22px);
+      width: clamp(22.5px, 6.15vw, 33px);
+      height: clamp(22.5px, 6.15vw, 33px);
     }
     button#play .svg-icon {
-      width: clamp(19px, 5.25vw, 28px);
-      height: clamp(19px, 5.25vw, 28px);
+      width: clamp(28.5px, 7.875vw, 42px);
+      height: clamp(28.5px, 7.875vw, 42px);
     }
   }
   .left-side .controls .progress-bar {
@@ -1222,13 +1219,11 @@ export default {
   .left-side .controls .media-controls {
     margin-top: min(2.4vw, 12px);
   }
-  /* no-lyric 桌面端用 translateX 居中，移动端已居中无需位移 */
   .lyrics-page.no-lyric .left-side {
     transform: none;
     margin-right: 0;
   }
 
-  /* 歌词模式：隐藏封面和时钟，歌词在上、控件在下，点击空白返回封面模式 */
   .lyrics-page.mobile-lyrics-mode {
     .left-side {
       order: 2;
@@ -1253,13 +1248,11 @@ export default {
       width: 100%;
       margin: 0;
       min-height: 0;
-      /* 歌词区域不占满全屏，两侧留空白可点击返回封面模式 */
       .lyrics-container {
         max-width: 82%;
         margin: 0 auto;
         padding-left: 0;
         padding-right: 0;
-        /* 歌词字号随屏幕宽度自适应（覆盖设置里的行内字号） */
         font-size: min(4.8vw, 20px) !important;
       }
     }
@@ -1272,7 +1265,6 @@ export default {
   }
 }
 
-/* 横屏矮屏：隐藏时钟并进一步压缩封面，保证底部控件完整可见 */
 @media (max-width: 768px) and (max-height: 480px) {
   .left-side .date {
     display: none;

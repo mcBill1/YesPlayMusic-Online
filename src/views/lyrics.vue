@@ -796,14 +796,20 @@ export default {
   justify-content: flex-end;
   margin-right: 32px;
   margin-top: 24px;
-  align-items: center;
+  align-items: flex-start;
   transition: all 0.5s;
+  overflow-y: auto;
 
   z-index: 1;
 
+  // 内容垂直居中（空间不足时从顶部开始，保证可滚动到控制区）
+  > div {
+    margin: auto 0;
+  }
+
   .date {
-    max-width: 54vh;
-    margin: 24px 0;
+    max-width: 45vh;
+    margin: 16px 0;
     color: var(--color-text);
     text-align: center;
     font-size: 4rem;
@@ -816,8 +822,8 @@ export default {
   }
 
   .controls {
-    max-width: 54vh;
-    margin-top: 24px;
+    max-width: 45vh;
+    margin-top: 16px;
     color: var(--color-text);
 
     .title {
@@ -955,8 +961,8 @@ export default {
 
   img {
     border-radius: 0.75em;
-    width: 54vh;
-    height: 54vh;
+    width: 45vh;
+    height: 45vh;
     user-select: none;
     object-fit: cover;
   }
@@ -964,8 +970,8 @@ export default {
   .shadow {
     position: absolute;
     top: 12px;
-    height: 54vh;
-    width: 54vh;
+    height: 45vh;
+    width: 45vh;
     filter: blur(16px) opacity(0.6);
     transform: scale(0.92, 0.96);
     z-index: -1;
@@ -1087,7 +1093,7 @@ export default {
 .lyrics-page.no-lyric {
   .left-side {
     transition: all 0.5s;
-    transform: translateX(27vh);
+    transform: translateX(22.5vh);
     margin-right: 0;
   }
 }
@@ -1321,7 +1327,7 @@ export default {
 
 .slide-fade-enter,
 .slide-fade-leave-to {
-  transform: translateX(27vh);
+  transform: translateX(22.5vh);
   opacity: 0;
 }
 </style>

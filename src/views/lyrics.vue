@@ -794,8 +794,7 @@ export default {
   flex: 1;
   display: flex;
   justify-content: flex-end;
-  // 左侧内容中心线位于屏幕自右 3/5 处（约 40% 宽度），右缘贴近歌词起始位置
-  margin-right: calc(10vw - 22.5vh + 16px);
+  margin-right: 32px;
   margin-top: 24px;
   align-items: center;
   transition: all 0.5s;

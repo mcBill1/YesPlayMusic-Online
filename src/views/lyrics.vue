@@ -794,18 +794,13 @@ export default {
   flex: 1;
   display: flex;
   justify-content: flex-end;
-  margin-right: 32px;
+  // 左侧内容中心线位于屏幕自右 3/5 处（约 40% 宽度），右缘贴近歌词起始位置
+  margin-right: calc(10vw - 22.5vh + 16px);
   margin-top: 24px;
-  align-items: flex-start;
+  align-items: center;
   transition: all 0.5s;
-  overflow-y: auto;
 
   z-index: 1;
-
-  // 内容垂直居中（空间不足时从顶部开始，保证可滚动到控制区）
-  > div {
-    margin: auto 0;
-  }
 
   .date {
     max-width: 45vh;

@@ -4,6 +4,7 @@
     <div class="search-input-box">
       <svg-icon icon-class="search" />
       <input
+        ref="searchInput"
         v-model="inputKeywords"
         type="search"
         :placeholder="$t('nav.search')"
@@ -144,10 +145,23 @@ export default {
     },
   },
   created() {
+    // 无关键字进入搜索页：立即可见，不等接口（移动端要靠这个时机自动聚焦弹键盘）
+    if (this.keywords.length === 0) this.show = true;
     this.getData();
+  },
+  mounted() {
+    this.focusSearchInput();
   },
   methods: {
     ...mapActions(['showToast']),
+    focusSearchInput() {
+      // 自动聚焦：移动端从导航栏搜索图标进来直接弹键盘，少点一次
+      this.$nextTick(() => {
+        const el = this.$refs.searchInput;
+        // 桌面端移动搜索框 display:none（offsetParent 为 null），不做无意义聚焦
+        if (el && el.offsetParent !== null) el.focus();
+      });
+    },
     doSearch() {
       if (!this.inputKeywords) return;
       if (this.$route.params.keywords === this.inputKeywords) return;
@@ -186,7 +200,8 @@ export default {
       setTimeout(() => {
         if (!this.show) NProgress.start();
       }, 1000);
-      this.show = false;
+      // 无关键字时不隐藏页面，否则输入框不在渲染树里、无法自动聚焦
+      this.show = this.keywords.length === 0;
 
       const requestAll = requests => {
         const keywords = this.keywords;
@@ -271,6 +286,7 @@ export default {
       font-weight: 600;
       width: 100%;
       min-width: 0;
+      height: 100%; // 整个搜索框区域都可点聚焦（触摸小屏更友好）
       padding-right: 12px;
       color: var(--color-text);
     }
@@ -320,6 +336,7 @@ export default {
   right: 0;
   left: 0;
   bottom: 64px;
+  pointer-events: none; // 纯提示层：不能拦截其下方搜索框的点击（否则移动端点搜索框不聚焦、不弹键盘）
   font-size: 24px;
   color: var(--color-text);
   opacity: 0.38;
